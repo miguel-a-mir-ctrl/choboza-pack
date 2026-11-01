@@ -89,3 +89,40 @@ test('button above the prompt opens the pane', async ($, on) => {
   expect(opened?.id).toBe('lab-panel')
   await ui.unmount()
 })
+
+// Blank paper outside Windows: white canvas without the .ps1 script
+test('blank paper on non-Windows makes a canvas', async ($, on) => {
+  const seed: Record<string, unknown> = { tab: 'sketch' }
+  on('state.get', (_, e, next) => (e.key in seed ? { value: { value: seed[e.key], version: 1 } } : next(e)))
+  on('env.get', () => ({ value: undefined }))
+  on('fs.read', () => { throw new Error('none') })
+  let canvas: any = null
+  on('state.set', (_, e: any, next) => { if (e.key === 'canvas') canvas = e.value; return next(e) })
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  await $.ui.press({ plugin: 'lab-panel', key: 'sk:blank' })
+  await new Promise(r => setTimeout(r, 50))
+  expect(canvas?.w).toBeGreaterThan(0)
+  await ui.unmount()
+})
+
+// Send on non-Windows: the PNG piped to base64 must carry the stroke pixels
+test('send on non-Windows writes stroke pixels', async ($, on) => {
+  const seed: Record<string, unknown> = { tab: 'sketch', canvas: { base: '', w: 40, h: 25, px: [] }, strokes: [[[5, 5], [6, 6], [7, 7]]] }
+  on('state.get', (_, e, next) => (e.key in seed ? { value: { value: seed[e.key], version: 1 } } : next(e)))
+  on('env.get', () => ({ value: undefined }))
+  on('fs.read', () => { throw new Error('none') })
+  on('clock.now', () => ({ value: 1 }))
+  on('prompt.fill', () => ({ isFilled: true }) as any)
+  let stdin = ''
+  on('process.run', (_, e: any) => { stdin = e.init?.stdin ?? ''; return { value: { exitCode: 0, stdout: '', stderr: '' } } })
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  await $.ui.press({ plugin: 'lab-panel', key: 'sk:send' })
+  await new Promise(r => setTimeout(r, 100))
+  const png = Uint8Array.from(atob(stdin), c => c.charCodeAt(0))
+  expect(png.length).toBeGreaterThan(1000)
+  // stored deflate: count non-filter bytes that are not 0 after the zlib header
+  let set = 0
+  for (let i = 60; i < png.length - 20; i++) if (png[i] !== 0 && png[i] !== 0xff) set++
+  expect(set).toBeGreaterThan(5)
+  await ui.unmount()
+})
