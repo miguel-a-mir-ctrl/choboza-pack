@@ -1,1 +1,3 @@
 NOTES.md
+plugins/*/tsconfig.json
+plugins/*/.claude-plugin/types/
