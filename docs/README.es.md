@@ -8,8 +8,8 @@ Dos mods pequeños para Claude Code, hechos para principiantes. Son código loca
 
 | Mod | Qué hace |
 |---|---|
-| **usage-line** | Una línea encima del campo de escritura: uso de 5 horas y semanal, modelo actual, effort y contexto. En Windows también muestra la carga de CPU, RAM, GPU y NPU. |
-| **lab-panel** | Un panel lateral con una lista de archivos de colores. Los archivos que Claude lee o edita se iluminan un momento. La pestaña de repetición muestra los cambios del último turno. Las pestañas de notas te permiten guardar tus propias notas. En Windows también hay una pestaña de boceto para dibujar sobre una imagen. |
+| **usage-line** | Una línea encima del campo de escritura: uso de 5 horas y semanal, modelo actual, effort y contexto. También muestra la carga de CPU, RAM y GPU, y la NPU si el sistema la informa. |
+| **lab-panel** | Un panel lateral con una lista de archivos de colores. Los archivos que Claude lee o edita se iluminan un momento. La pestaña de repetición muestra los cambios del último turno. Las pestañas de notas te permiten guardar tus propias notas. Una pestaña de boceto te deja dibujar marcas y enviarlas a Claude (en Windows también sobre una imagen del portapapeles). |
 
 ## Instalación
 
@@ -21,7 +21,7 @@ Escribe esto en Claude Code:
 /plugin install lab-panel@choboza-pack
 ```
 
-Después, reinicia Claude Code (o ejecuta `/reload-plugins`). Abre el panel con `/panel`.
+Después, reinicia Claude Code (o ejecuta `/reload-plugins`). Abre el panel con `/panel` o haz clic en `[Panel]` encima del campo de escritura (funciona incluso mientras Claude trabaja).
 
 ## Configuración
 
@@ -30,6 +30,7 @@ Cámbiala en la configuración del plugin (`/plugin`).
 | Mod | Opción | Valores |
 |---|---|---|
 | ambos | `language` | `auto` (idioma de tu sistema), `ko`, `en`, `zh-Hans`, `zh-Hant`, `ja`, `es`, `fr`, `id`, `th` |
+| usage-line | `gpu` | `auto` (la GPU más ocupada, predeterminado), `nvidia`, `amd`, `intel`, `off` |
 | lab-panel | `icons` | `nerd` (iconos por tipo de archivo, por defecto), `plain` (letras simples) |
 | lab-panel | `autoOpen` | `true` = abre el panel al iniciar una sesión (por defecto `false`) |
 | lab-panel | `tabsDir` | Carpeta de tus pestañas de notas. Vacía = `~/.claude/choboza-pack/panel` |
@@ -44,7 +45,7 @@ La lista de archivos usa iconos de [Nerd Font](https://www.nerdfonts.com/font-do
 ## Notas
 
 - Casi cero tokens: los mods se ejecutan en tu PC y no añaden nada a lo que Claude lee, salvo una nota corta (unos 20 tokens) cuando el contexto pasa de 100k, que sugiere `/compact` o una sesión nueva. Medido el 2026-11-01: los mismos tokens de entrada con y sin el pack (dentro del margen normal entre ejecuciones).
-- La pestaña de boceto y el medidor de CPU/GPU solo funcionan en Windows. Lo demás funciona en todas partes.
+- Probado sobre todo en Windows. Linux y macOS también funcionan, pero con menos pruebas (en macOS no se muestra la NPU).
 - Las traducciones que no son al coreano ni al inglés son hechas por máquina. Las correcciones son bienvenidas.
 
 ## Licencia

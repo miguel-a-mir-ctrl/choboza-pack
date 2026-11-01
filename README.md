@@ -8,8 +8,8 @@ Two small mods for Claude Code, made for beginners. They run as local code on yo
 
 | Mod | What it does |
 |---|---|
-| **usage-line** | A line above the prompt: 5-hour and weekly usage, the current model, effort and context. On Windows it also shows CPU, RAM, GPU and NPU load. |
-| **lab-panel** | A side panel with a colorful file tree. Files Claude reads or edits light up for a moment. A replay tab shows the last turn's edits. Note tabs let you keep your own notes. On Windows there is also a sketch tab for drawing on an image. |
+| **usage-line** | A line above the prompt: 5-hour and weekly usage, the current model, effort and context. It also shows CPU, RAM and GPU load, and NPU where the system reports it. |
+| **lab-panel** | A side panel with a colorful file tree. Files Claude reads or edits light up for a moment. A replay tab shows the last turn's edits. Note tabs let you keep your own notes. A sketch tab lets you draw marks and send them to Claude (on Windows also on top of a clipboard image). |
 
 ## Install
 
@@ -21,7 +21,7 @@ Type these in Claude Code:
 /plugin install lab-panel@choboza-pack
 ```
 
-Then restart Claude Code (or run `/reload-plugins`). Open the panel with `/panel`.
+Then restart Claude Code (or run `/reload-plugins`). Open the panel with `/panel`, or click `[Panel]` above the prompt (this works even while Claude is busy).
 
 ## Options
 
@@ -30,6 +30,7 @@ Change these in the plugin's settings (`/plugin`).
 | Mod | Option | Values |
 |---|---|---|
 | both | `language` | `auto` (your system language), `ko`, `en`, `zh-Hans`, `zh-Hant`, `ja`, `es`, `fr`, `id`, `th` |
+| usage-line | `gpu` | `auto` (the busiest GPU, default), `nvidia`, `amd`, `intel`, `off` |
 | lab-panel | `icons` | `nerd` (file-type icons, default), `plain` (simple letters) |
 | lab-panel | `autoOpen` | `true` = open the panel when a session starts (default `false`) |
 | lab-panel | `tabsDir` | Folder for your note tabs. Empty = `~/.claude/choboza-pack/panel` |
@@ -44,7 +45,7 @@ The file tree uses [Nerd Font](https://www.nerdfonts.com/font-downloads) icons. 
 ## Notes
 
 - Near-zero tokens: the mods run on your PC and add nothing to what Claude reads, except a short note (about 20 tokens) when the context passes 100k, suggesting `/compact` or a new session. Measured 2026-11-01: same input tokens with and without the pack (within normal run-to-run noise).
-- The sketch tab and the CPU/GPU meter work on Windows only. Everything else works everywhere.
+- Tested mostly on Windows. Linux and macOS work too but are less tested (the macOS meter shows no NPU).
 - Translations other than Korean and English are machine-made. Fixes are welcome.
 
 ## License

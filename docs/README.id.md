@@ -8,8 +8,8 @@ Dua mod kecil untuk Claude Code, dibuat untuk pemula. Mod ini berjalan sebagai k
 
 | Mod | Fungsinya |
 |---|---|
-| **usage-line** | Satu baris di atas kotak prompt: pemakaian 5 jam dan mingguan, model saat ini, effort, dan konteks. Di Windows juga menampilkan beban CPU, RAM, GPU, dan NPU. |
-| **lab-panel** | Panel di samping dengan daftar file berwarna. File yang dibaca atau diubah Claude akan menyala sebentar. Tab ulang menampilkan perubahan dari giliran terakhir. Tab catatan bisa Anda pakai untuk catatan sendiri. Di Windows ada juga tab sketsa untuk menggambar di atas gambar. |
+| **usage-line** | Satu baris di atas kotak prompt: pemakaian 5 jam dan mingguan, model saat ini, effort, dan konteks. Juga menampilkan beban CPU, RAM, dan GPU, serta NPU jika sistem menyediakannya. |
+| **lab-panel** | Panel di samping dengan daftar file berwarna. File yang dibaca atau diubah Claude akan menyala sebentar. Tab ulang menampilkan perubahan dari giliran terakhir. Tab catatan bisa Anda pakai untuk catatan sendiri. Tab sketsa memungkinkan Anda menggambar tanda dan mengirimkannya ke Claude (di Windows juga di atas gambar dari clipboard). |
 
 ## Instalasi
 
@@ -21,7 +21,7 @@ Ketik ini di Claude Code:
 /plugin install lab-panel@choboza-pack
 ```
 
-Lalu mulai ulang Claude Code (atau jalankan `/reload-plugins`). Buka panel dengan `/panel`.
+Lalu mulai ulang Claude Code (atau jalankan `/reload-plugins`). Buka panel dengan `/panel`, atau klik `[Panel]` di atas kotak prompt (tetap bisa saat Claude sedang bekerja).
 
 ## Pengaturan
 
@@ -30,6 +30,7 @@ Ubah di pengaturan plugin (`/plugin`).
 | Mod | Pengaturan | Nilai |
 |---|---|---|
 | keduanya | `language` | `auto` (bahasa sistem Anda), `ko`, `en`, `zh-Hans`, `zh-Hant`, `ja`, `es`, `fr`, `id`, `th` |
+| usage-line | `gpu` | `auto` (GPU tersibuk, bawaan), `nvidia`, `amd`, `intel`, `off` |
 | lab-panel | `icons` | `nerd` (ikon jenis file, bawaan), `plain` (huruf sederhana) |
 | lab-panel | `autoOpen` | `true` = buka panel saat sesi dimulai (bawaan `false`) |
 | lab-panel | `tabsDir` | Folder untuk tab catatan. Kosong = `~/.claude/choboza-pack/panel` |
@@ -44,7 +45,7 @@ Daftar file memakai ikon [Nerd Font](https://www.nerdfonts.com/font-downloads). 
 ## Catatan
 
 - Hampir nol token: mod berjalan di PC Anda dan tidak menambahkan apa pun ke yang dibaca Claude, kecuali satu catatan singkat (sekitar 20 token) saat konteks melewati 100k, yang menyarankan `/compact` atau sesi baru. Diukur 2026-11-01: token input sama dengan dan tanpa paket ini (dalam selisih normal antar percobaan).
-- Tab sketsa dan indikator CPU/GPU hanya untuk Windows. Sisanya bisa dipakai di mana saja.
+- Sebagian besar diuji di Windows. Linux dan macOS juga bisa, tetapi lebih sedikit diuji (di macOS NPU tidak ditampilkan).
 - Terjemahan selain bahasa Korea dan Inggris dibuat oleh mesin. Perbaikan sangat diterima.
 
 ## Lisensi
