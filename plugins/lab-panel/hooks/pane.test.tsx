@@ -76,3 +76,16 @@ test('줄 배치가 바뀐 뒤 끌기', async ($, on) => {
   expect(JSON.parse(marks)).toMatchObject([{ line: 2, kind: 'bang' }])
   await ui.unmount()
 })
+
+// The always-visible [Panel] button above the prompt opens the pane (works mid-turn, unlike /panel)
+test('button above the prompt opens the pane', async ($, on) => {
+  let opened: any = null
+  on('ui.open', (_, e) => { opened = e; return { value: undefined } })
+  on('ui.render', ($, e) => { const { Text } = $.ui.resolve(e); return <Text>below</Text> })
+  const ui = await $.ui.mount({ plugin: 'lab-panel', component: 'AbovePrompt', props: { bodyColumns: 80, hasSurvey: false }, surface: 'terminal' } as any)
+  expect((await ui.find({ type: 'Text', text: /\[.+\]/ }))?.text).toBeTruthy()
+  await $.ui.press({ plugin: 'lab-panel', key: 'open-panel' })
+  await new Promise(r => setTimeout(r, 50))
+  expect(opened?.id).toBe('lab-panel')
+  await ui.unmount()
+})

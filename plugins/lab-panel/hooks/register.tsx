@@ -330,6 +330,19 @@ export const register: Register = (on, options) => {
     return ran
   })
 
+  // Always-visible button: /panel typed mid-turn waits in the queue, a press opens the pane right away.
+  on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
+    const after = await next(e)
+    if (e.props.hasSurvey) return after
+    const { Box, Text, Button } = $.ui.resolve(e)
+    const btn = (
+      <Button key="open-panel" plain onPress={() => void (async () => { await init($); await openPane($) })()}>
+        <Text dimColor>{`[${tr('btnPanel')}]`}</Text>
+      </Button>
+    )
+    return after ? <Box flexDirection="column">{after}{btn}</Box> : btn
+  })
+
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     await init($)
     const { Box, Text, Button, Input, Markdown, Client } = $.ui.resolve(e)

@@ -1,6 +1,6 @@
 {
   "name": "lab-panel",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Side panel: a colorful file tree that lights up the files Claude reads and edits, a replay of the last turn's edits, and note tabs you can mark up",
   "author": {
     "name": "miguel-a-mir-ctrl"
