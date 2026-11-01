@@ -1,0 +1,51 @@
+[English](../README.md) · [한국어](README.ko.md) · [简体中文](README.zh-Hans.md) · [繁體中文](README.zh-Hant.md) · [日本語](README.ja.md) · [Español](README.es.md) · [Français](README.fr.md) · [Bahasa Indonesia](README.id.md) · [ไทย](README.th.md)
+
+# choboza-pack
+
+มอดเล็กสองตัวสำหรับ Claude Code ทำมาให้มือใหม่ใช้ ทำงานเป็นโค้ดในเครื่องของคุณ
+
+## มีอะไรบ้าง
+
+| มอด | ทำอะไร |
+|---|---|
+| **usage-line** | แถวเดียวเหนือช่องพิมพ์: การใช้งาน 5 ชั่วโมงและรายสัปดาห์, โมเดลปัจจุบัน, effort และบริบท บน Windows ยังแสดงภาระงาน CPU, RAM, GPU และ NPU ด้วย |
+| **lab-panel** | แผงด้านข้างที่มีรายการไฟล์สีสัน ไฟล์ที่ Claude อ่านหรือแก้จะกระพริบสักครู่ แท็บเล่นซ้ำแสดงการแก้ไขของรอบล่าสุด แท็บโน้ตให้คุณเก็บบันทึกของตัวเองได้ บน Windows มีแท็บสเก็ตช์สำหรับวาดทับรูปภาพด้วย |
+
+## ติดตั้ง
+
+พิมพ์คำสั่งเหล่านี้ใน Claude Code:
+
+```
+/plugin marketplace add miguel-a-mir-ctrl/choboza-pack
+/plugin install usage-line@choboza-pack
+/plugin install lab-panel@choboza-pack
+```
+
+จากนั้นเปิด Claude Code ใหม่ (หรือรัน `/reload-plugins`) เปิดแผงด้วย `/panel`
+
+## ตั้งค่า
+
+เปลี่ยนได้ในการตั้งค่าปลั๊กอิน (`/plugin`)
+
+| มอด | ตั้งค่า | ค่า |
+|---|---|---|
+| ทั้งสองตัว | `language` | `auto` (ภาษาของระบบ), `ko`, `en`, `zh-Hans`, `zh-Hant`, `ja`, `es`, `fr`, `id`, `th` |
+| lab-panel | `icons` | `nerd` (ไอคอนประเภทไฟล์, ค่าเริ่มต้น), `plain` (ตัวอักษรธรรมดา) |
+| lab-panel | `autoOpen` | `true` = เปิดแผงเมื่อเริ่มเซสชัน (ค่าเริ่มต้นคือ `false`) |
+| lab-panel | `tabsDir` | โฟลเดอร์ของแท็บโน้ต ถ้าเว้นว่าง = `~/.claude/choboza-pack/panel` |
+
+## ไอคอนแสดงเป็นกล่องสี่เหลี่ยมใช่ไหม?
+
+รายการไฟล์ใช้ไอคอนจาก [Nerd Font](https://www.nerdfonts.com/font-downloads) ถ้าเห็น □ แทนไอคอน ให้ทำอย่างใดอย่างหนึ่ง:
+
+- ติดตั้ง Nerd Font แล้วเลือกในการตั้งค่าฟอนต์ของเทอร์มินัล
+- เปลี่ยน `icons` เป็น `plain`
+
+## หมายเหตุ
+
+- แท็บสเก็ตช์และตัววัด CPU/GPU ใช้ได้เฉพาะบน Windows ส่วนที่เหลือใช้ได้ทุกที่
+- คำแปลที่ไม่ใช่ภาษาเกาหลีและภาษาอังกฤษเป็นการแปลด้วยเครื่อง ยินดีรับการแก้ไข
+
+## ใบอนุญาต
+
+[MIT](../LICENSE)

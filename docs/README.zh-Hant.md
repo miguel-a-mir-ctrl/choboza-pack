@@ -1,0 +1,51 @@
+[English](../README.md) · [한국어](README.ko.md) · [简体中文](README.zh-Hans.md) · [繁體中文](README.zh-Hant.md) · [日本語](README.ja.md) · [Español](README.es.md) · [Français](README.fr.md) · [Bahasa Indonesia](README.id.md) · [ไทย](README.th.md)
+
+# choboza-pack
+
+兩個為初學者準備的 Claude Code 小模組。它們是在你電腦上執行的本機程式碼。
+
+## 包含的內容
+
+| 模組 | 功能 |
+|---|---|
+| **usage-line** | 輸入框上方的一行：5 小時和每週用量、目前模型、effort 和上下文。在 Windows 上還會顯示 CPU、RAM、GPU 和 NPU 的使用率。 |
+| **lab-panel** | 旁邊的面板，顯示彩色的檔案清單。Claude 讀取或修改過的檔案會亮一下。重播分頁顯示上一輪修改的內容。備註分頁可以放你自己的筆記。在 Windows 上還有一個可以在圖片上畫圖的素描分頁。 |
+
+## 安裝
+
+在 Claude Code 中輸入：
+
+```
+/plugin marketplace add miguel-a-mir-ctrl/choboza-pack
+/plugin install usage-line@choboza-pack
+/plugin install lab-panel@choboza-pack
+```
+
+然後重新啟動 Claude Code（或執行 `/reload-plugins`）。用 `/panel` 開啟面板。
+
+## 設定
+
+在外掛設定（`/plugin`）中修改。
+
+| 模組 | 設定 | 值 |
+|---|---|---|
+| 兩者 | `language` | `auto`（系統語言）、`ko`、`en`、`zh-Hans`、`zh-Hant`、`ja`、`es`、`fr`、`id`、`th` |
+| lab-panel | `icons` | `nerd`（檔案類型圖示，預設）、`plain`（簡單字母） |
+| lab-panel | `autoOpen` | `true` = 工作階段開始時開啟面板（預設 `false`） |
+| lab-panel | `tabsDir` | 備註分頁的資料夾。留空 = `~/.claude/choboza-pack/panel` |
+
+## 圖示顯示為方塊？
+
+檔案清單使用 [Nerd Font](https://www.nerdfonts.com/font-downloads) 圖示。如果看到的是 □ 而不是圖示，可以試試以下兩種方法之一：
+
+- 安裝 Nerd Font，並在終端機的字型設定中選擇它
+- 把 `icons` 改為 `plain`
+
+## 注意
+
+- 素描分頁和 CPU/GPU 顯示僅在 Windows 上可用。其他功能在所有系統上都能用。
+- 韓文和英文以外的翻譯是機器翻譯的。歡迎幫忙修正。
+
+## 授權
+
+[MIT](../LICENSE)
