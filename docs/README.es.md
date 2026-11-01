@@ -43,6 +43,7 @@ La lista de archivos usa iconos de [Nerd Font](https://www.nerdfonts.com/font-do
 
 ## Notas
 
+- Casi cero tokens: los mods se ejecutan en tu PC y no añaden nada a lo que Claude lee, salvo una nota corta (unos 20 tokens) cuando el contexto pasa de 100k, que sugiere `/compact` o una sesión nueva. Medido el 2026-11-01: los mismos tokens de entrada con y sin el pack (dentro del margen normal entre ejecuciones).
 - La pestaña de boceto y el medidor de CPU/GPU solo funcionan en Windows. Lo demás funciona en todas partes.
 - Las traducciones que no son al coreano ni al inglés son hechas por máquina. Las correcciones son bienvenidas.
 

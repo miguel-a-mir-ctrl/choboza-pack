@@ -43,6 +43,7 @@ La liste de fichiers utilise les icônes [Nerd Font](https://www.nerdfonts.com/f
 
 ## Remarques
 
+- Presque zéro token : les mods tournent sur votre PC et n'ajoutent rien à ce que Claude lit, sauf une courte note (environ 20 tokens) quand le contexte dépasse 100k, qui suggère `/compact` ou une nouvelle session. Mesuré le 2026-11-01 : mêmes tokens d'entrée avec et sans le pack (dans la marge normale entre deux essais).
 - L'onglet croquis et l'indicateur CPU/GPU ne fonctionnent que sous Windows. Le reste fonctionne partout.
 - Les traductions autres que le coréen et l'anglais sont faites par machine. Les corrections sont les bienvenues.
 

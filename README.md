@@ -43,6 +43,7 @@ The file tree uses [Nerd Font](https://www.nerdfonts.com/font-downloads) icons. 
 
 ## Notes
 
+- Near-zero tokens: the mods run on your PC and add nothing to what Claude reads, except a short note (about 20 tokens) when the context passes 100k, suggesting `/compact` or a new session. Measured 2026-11-01: same input tokens with and without the pack (within normal run-to-run noise).
 - The sketch tab and the CPU/GPU meter work on Windows only. Everything else works everywhere.
 - Translations other than Korean and English are machine-made. Fixes are welcome.
 

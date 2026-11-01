@@ -43,6 +43,7 @@ Daftar file memakai ikon [Nerd Font](https://www.nerdfonts.com/font-downloads). 
 
 ## Catatan
 
+- Hampir nol token: mod berjalan di PC Anda dan tidak menambahkan apa pun ke yang dibaca Claude, kecuali satu catatan singkat (sekitar 20 token) saat konteks melewati 100k, yang menyarankan `/compact` atau sesi baru. Diukur 2026-11-01: token input sama dengan dan tanpa paket ini (dalam selisih normal antar percobaan).
 - Tab sketsa dan indikator CPU/GPU hanya untuk Windows. Sisanya bisa dipakai di mana saja.
 - Terjemahan selain bahasa Korea dan Inggris dibuat oleh mesin. Perbaikan sangat diterima.
 
