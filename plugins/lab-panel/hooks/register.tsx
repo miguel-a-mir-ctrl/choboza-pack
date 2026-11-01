@@ -3,7 +3,7 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
 import type { PanelCanvas, PanelDots, PanelEdit, PanelMark, PanelStep, PanelTab, PanelTouch } from '../types'
-import { addTouch, anyFresh, cellsOf, setRoot, diffOf, fitCells, GUIDE_COLOR, heatOf, iconColorOf, iconOf, stepOf, touchOf } from './activity'
+import { addTouch, anyFresh, cellsOf, setRoot, diffOf, fitCells, GUIDE_COLOR, heatOf, iconColorOf, iconOf, setIcons, stepOf, touchOf } from './activity'
 
 const PANE = 'lab-panel'
 // Set at session start from the engine (project root, home, the mod's own folder).
@@ -237,6 +237,7 @@ async function init($: EngineInterface) {
 export const register: Register = (on, options) => {
   OPTS = options
   setLang(String(options.language ?? 'auto'))
+  setIcons(String(options.icons ?? 'nerd'))
   on('session.start', async ($, e, next) => {
     await $.command.register({ name: 'panel', description: tr('cmdDesc') })
     await init($)

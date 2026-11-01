@@ -19,6 +19,13 @@
       "description": "Where your note tabs are kept. Empty: ~/.claude/choboza-pack/panel",
       "default": ""
     },
+    "icons": {
+      "type": "string",
+      "title": "Icons",
+      "description": "nerd = file-type icons (needs a Nerd Font). plain = simple letters, for when icons show as boxes.",
+      "default": "nerd",
+      "options": ["nerd", "plain"]
+    },
     "language": {
       "type": "string",
       "title": "Language",

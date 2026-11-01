@@ -59,8 +59,12 @@ const ICONS: [RegExp, string, string][] = [
 const FILE_ICON = ['\uf15b', '#7F8790']
 export const DIR_COLOR = '#E8B85C'
 export const GUIDE_COLOR = '#4A4F57'
+// plain = ASCII for terminals without a Nerd Font (1 cell each, like the Nerd Mono glyphs; color still shows the type).
+let PLAIN = false
+export function setIcons(mode: string) { PLAIN = mode === 'plain' }
 export function iconOf(name: string, isDir: boolean, open: boolean): string {
-  if (isDir) return open ? '\uf07c' : '\uf07b'
+  if (isDir) return PLAIN ? (open ? 'v' : '>') : open ? '\uf07c' : '\uf07b'
+  if (PLAIN) return '-'
   return ICONS.find(([re]) => re.test(name))?.[1] ?? FILE_ICON[0]
 }
 export function iconColorOf(name: string, isDir: boolean): string {

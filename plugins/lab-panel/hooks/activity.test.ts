@@ -1,6 +1,6 @@
 import { expect, test } from 'claude-code/testing'
 
-import { addTouch, cellsOf, diffOf, FADE_MS, fitCells, heatOf, iconOf, setRoot, stepOf, toRel, touchOf } from './activity'
+import { addTouch, cellsOf, diffOf, FADE_MS, fitCells, heatOf, iconOf, setIcons, setRoot, stepOf, toRel, touchOf } from './activity'
 
 setRoot('C:/proj')
 
@@ -34,6 +34,9 @@ test('icons', () => {
   expect(iconOf('a.py', false, false)).toBe('\ue73c')
   expect(iconOf('x', true, true)).toBe('\uf07c')
   expect(iconOf('noext', false, false)).toBe('\uf15b')
+  setIcons('plain')
+  expect([iconOf('a.py', false, false), iconOf('x', true, true), iconOf('x', true, false)]).toEqual(['-', 'v', '>'])
+  setIcons('nerd')
 })
 
 test('replay step and short diff', () => {
