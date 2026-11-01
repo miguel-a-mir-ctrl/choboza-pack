@@ -4,7 +4,7 @@ const PANE = {
   plugin: 'lab-panel',
   component: 'Pane',
   requestId: 'lab-panel',
-  props: { title: 'ai-lab', isFocused: true, bodyColumns: 60, placement: 'dock', scroll: { offset: 0, bodyRows: 30 }, view: {} },
+  props: { title: 'my-project', isFocused: true, bodyColumns: 60, placement: 'dock', scroll: { offset: 0, bodyRows: 30 }, view: {} },
 } as const
 
 // 글 보기 화면에서 도구 버튼을 누르면 tool 상태가 바뀌어야 한다

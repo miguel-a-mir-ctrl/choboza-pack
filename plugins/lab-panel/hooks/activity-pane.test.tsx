@@ -4,7 +4,7 @@ const PANE = {
   plugin: 'lab-panel',
   component: 'Pane',
   requestId: 'lab-panel',
-  props: { title: 'ai-lab', isFocused: true, bodyColumns: 40, placement: 'dock', scroll: { offset: 0, bodyRows: 30 }, view: {} },
+  props: { title: 'my-project', isFocused: true, bodyColumns: 40, placement: 'dock', scroll: { offset: 0, bodyRows: 30 }, view: {} },
 } as const
 
 const fsList = (path: string) =>
