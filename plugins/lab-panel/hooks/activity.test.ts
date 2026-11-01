@@ -51,6 +51,7 @@ test('replay step and short diff', () => {
 
 test('cells and fit: Hangul is 2 cells, long names get an ellipsis', () => {
   expect(cellsOf('ab가')).toBe(4)
+  expect(cellsOf('ต้นไม้')).toBe(4) // Thai: 6 code points, 2 are combining marks
   expect(fitCells('short', 10)).toBe('short')
   expect(fitCells('abcdefghij', 6)).toBe('abcde…')
   expect(cellsOf(fitCells('가나다라마바', 7))).toBeLessThan(8)

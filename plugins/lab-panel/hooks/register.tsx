@@ -351,7 +351,7 @@ export const register: Register = (on, options) => {
     } else if (tab === 'replay') {
       const steps = await read($, stepsAtom)
       const w = Math.max(10, (e.props.bodyColumns || 40) - 1)
-      const fit = (s: string) => ([...s].length > w ? [...s].slice(0, w - 1).join('') + '…' : s)
+      const fit = (s: string) => fitCells(s, w)
       if (!steps.length) {
         items.push(<Text key="rp:none" dimColor>{fit(tr('replayNone1'))}</Text>)
         items.push(<Text key="rp:none2" dimColor>{fit(tr('replayNone2'))}</Text>)

@@ -72,8 +72,8 @@ export function iconColorOf(name: string, isDir: boolean): string {
   return ICONS.find(([re]) => re.test(name))?.[2] ?? FILE_ICON[1]
 }
 
-// Terminal cells of a string (Hangul and other wide letters = 2).
-export const cellsOf = (s: string) => [...s].reduce((n, c) => n + (/[\u1100-\u115f\u2e80-\ua4cf\uac00-\ud7a3\uf900-\ufaff\ufe30-\ufe4f\uff00-\uff60\uffe0-\uffe6]/.test(c) ? 2 : 1), 0)
+// Terminal cells of a string (Hangul and other wide letters = 2, combining marks such as Thai vowels/tones = 0).
+export const cellsOf = (s: string) => [...s].reduce((n, c) => n + (/[\u0300-\u036f\u0e31\u0e34-\u0e3a\u0e47-\u0e4e\u200b-\u200d]/.test(c) ? 0 : /[\u1100-\u115f\u2e80-\ua4cf\uac00-\ud7a3\uf900-\ufaff\ufe30-\ufe4f\uff00-\uff60\uffe0-\uffe6]/.test(c) ? 2 : 1), 0)
 // Cut a name to `room` cells with an ellipsis.
 export function fitCells(s: string, room: number): string {
   if (cellsOf(s) <= room) return s
