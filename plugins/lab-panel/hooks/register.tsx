@@ -1,3 +1,4 @@
+import { setLang, t as tr } from './i18n'
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
@@ -155,7 +156,7 @@ async function ps($: EngineInterface, script: string, args: string[]): Promise<R
   try {
     return JSON.parse(r.stdout.trim().split('\n').pop() ?? '{}')
   } catch {
-    return { error: (r.stderr || r.stdout).trim().slice(0, 200) || '알 수 없는 오류' }
+    return { error: (r.stderr || r.stdout).trim().slice(0, 200) || tr('unknownErr') }
   }
 }
 
@@ -177,8 +178,8 @@ async function sendCanvas($: EngineInterface): Promise<void> {
   const strokesFile = `${SKETCH_DIR}/.strokes.json`
   await $.fs.write(strokesFile, JSON.stringify(await read($, strokesAtom)))
   const j = await ps($, 'sketch-save.ps1', ['-Base', cv.base, '-StrokesFile', strokesFile, '-W', String(cv.w), '-H', String(cv.h), '-Out', out])
-  if (j.error) return void $.ui.toast(`저장 실패: ${j.error}`)
-  void $.prompt.fill({ text: `이 그림 봐줘 (내가 그린 표시 = 자홍색 #FF00FF 선): ${out} `, mode: 'append' })
+  if (j.error) return void $.ui.toast(tr('saveFail', { err: String(j.error) }))
+  void $.prompt.fill({ text: tr('fillSketch', { out }), mode: 'append' })
 }
 
 // 글 보기(viewer.tsx): 끌어서 고른 범위(sel), 표시 칸 클릭(gutter)
@@ -235,8 +236,9 @@ async function init($: EngineInterface) {
 
 export const register: Register = (on, options) => {
   OPTS = options
+  setLang(String(options.language ?? 'auto'))
   on('session.start', async ($, e, next) => {
-    await $.command.register({ name: 'panel', description: '패널 열기 (폴더 트리, 그림판, 내 탭)' })
+    await $.command.register({ name: 'panel', description: tr('cmdDesc') })
     await init($)
     if (options.autoOpen) void openPane($)
     // 1.5초마다 보고 있는 파일·메모가 바뀌었으면 다시 그린다 (토큰 안 듦)
@@ -259,7 +261,7 @@ export const register: Register = (on, options) => {
   on('command.run', { command: 'panel' }, async $ => {
     await init($)
     await openPane($)
-    return { text: '패널을 열었습니다.' }
+    return { text: tr('panelOpened') }
   })
 
   // 그림판(canvas.tsx)이 한 획 끝날 때마다 보내는 선
@@ -333,16 +335,16 @@ export const register: Register = (on, options) => {
       fixed = (
         <Box flexDirection="column">
           <Box flexDirection="row" flexWrap="wrap" gap={1}>
-            <Button key="sk:clip" onPress={() => void loadCanvas($, 'clip', maxW, maxH)}>클립보드 그림</Button>
-            <Button key="sk:blank" onPress={() => void loadCanvas($, 'blank', maxW, maxH)}>빈 종이</Button>
-            {cv ? <Button key="sk:clear" onPress={async () => { await update($, strokesAtom, () => []); await update($, clearAtom, n => n + 1) }}>다 지우기</Button> : null}
-            {cv ? <Button key="sk:send" variant="primary" onPress={() => void sendCanvas($)}>Claude 에게 보내기</Button> : null}
+            <Button key="sk:clip" onPress={() => void loadCanvas($, 'clip', maxW, maxH)}>{tr('btnClipboard')}</Button>
+            <Button key="sk:blank" onPress={() => void loadCanvas($, 'blank', maxW, maxH)}>{tr('btnBlank')}</Button>
+            {cv ? <Button key="sk:clear" onPress={async () => { await update($, strokesAtom, () => []); await update($, clearAtom, n => n + 1) }}>{tr('btnClear')}</Button> : null}
+            {cv ? <Button key="sk:send" variant="primary" onPress={() => void sendCanvas($)}>{tr('btnSend')}</Button> : null}
           </Box>
           {cv
             ? <Client key="canvas" module="./canvas.tsx" props={{ w: cv.w, h: cv.h, px: cv.px, clear: await read($, clearAtom) }} width={cv.w} height={Math.ceil(cv.h / 2)} />
-            : <Text dimColor>{'Win+Shift+S 로 화면을 캡처한 뒤 "클립보드 그림", 또는 "빈 종이"를 누르세요.'}</Text>}
-          {cv ? <Text dimColor>{'한 번 클릭 → 왼쪽 버튼으로 끌어 그리기 · 오른쪽 클릭 = 한 획 취소'}</Text> : null}
-          {cv ? <Text color={strokes.length ? 'success' : 'warning'}>{`받은 획 ${strokes.length}개`}</Text> : null}
+            : <Text dimColor>{tr('sketchHint')}</Text>}
+          {cv ? <Text dimColor>{tr('sketchDraw')}</Text> : null}
+          {cv ? <Text color={strokes.length ? 'success' : 'warning'}>{tr('strokesGot', { n: strokes.length })}</Text> : null}
         </Box>
       )
     } else if (tab === 'replay') {
@@ -350,8 +352,8 @@ export const register: Register = (on, options) => {
       const w = Math.max(10, (e.props.bodyColumns || 40) - 1)
       const fit = (s: string) => ([...s].length > w ? [...s].slice(0, w - 1).join('') + '…' : s)
       if (!steps.length) {
-        items.push(<Text key="rp:none" dimColor>{fit('아직 고친 파일이 없어요.')}</Text>)
-        items.push(<Text key="rp:none2" dimColor>{fit('제가 파일을 고친 턴이 끝나면 나와요.')}</Text>)
+        items.push(<Text key="rp:none" dimColor>{fit(tr('replayNone1'))}</Text>)
+        items.push(<Text key="rp:none2" dimColor>{fit(tr('replayNone2'))}</Text>)
       } else {
         const k = Math.min(await read($, rstepAtom), steps.length - 1)
         const s = steps[k]
@@ -369,7 +371,7 @@ export const register: Register = (on, options) => {
         items.push(<Text key="rp:file" color={HEAT.edit[0]} bold>{fit(`${iconOf(s.path.split('/').pop() ?? '', false, false)} ${s.path} (${s.tool})`)}</Text>)
         d.lines.forEach((l, i) =>
           items.push(<Text key={`rp:l${i}`} color={l.sign === '+' ? '#5FD068' : '#FF6B6B'}>{fit(`${l.sign} ${l.text.replace(/\t/g, '  ')}`)}</Text>))
-        if (d.added + d.removed > d.lines.length) items.push(<Text key="rp:more" dimColor>{`… ${d.added + d.removed - d.lines.length}줄 더`}</Text>)
+        if (d.added + d.removed > d.lines.length) items.push(<Text key="rp:more" dimColor>{tr('moreLines', { n: d.added + d.removed - d.lines.length })}</Text>)
       }
     } else if (tab !== 'tree') {
       const t = tabs.find(x => x.id === tab)
@@ -386,7 +388,7 @@ export const register: Register = (on, options) => {
         )
         const bar = (
           <Box key="v:bar" flexDirection="row" gap={1}>
-            {toggle('memo', '메모')}
+            {toggle('memo', tr('viewMemo'))}
             {toggle('file', open)}
           </Box>
         )
@@ -394,7 +396,7 @@ export const register: Register = (on, options) => {
         if (showFile) {
           // 줄 번호 + 표시 칸 + 본문 (viewer.tsx 가 그림). 본문은 보기만, 고치는 건 Claude 에게 말해서.
           const text = await $.fs.read(`${ROOT}/${open}`).catch(() => null)
-          const lines = (text ?? '(파일을 읽을 수 없어요)').replace(/\r/g, '').replace(/\t/g, '  ').split('\n')
+          const lines = (text ?? tr('fileUnreadable')).replace(/\r/g, '').replace(/\t/g, '  ').split('\n')
           const nw = String(lines.length).length
           const bw = Math.max(10, (e.props.bodyColumns || 40) - 1 - nw - 6) // 6 = 번호 뒤 칸 + 표시 4칸 + │
           const rows: { line: number; off: number; t: string; first: boolean; note?: boolean; caret?: boolean }[] = []
@@ -420,7 +422,7 @@ export const register: Register = (on, options) => {
           items = rows
         } else {
           const body = (await $.fs.read(`${TABS_DIR}/${t.id}.md`).catch(() => '')).trim()
-          ;(body ? body.split('\n') : [`아직 비어 있어요. Claude 와 정해서 채웁니다.`, `파일: ${TABS_DIR}/${t.id}.md`])
+          ;(body ? body.split('\n') : [tr('tabEmpty'), tr('tabFile', { path: `${TABS_DIR}/${t.id}.md` })])
             .forEach((ln, i) => items.push(body ? <Markdown key={`md:${t.id}:${i}`} text={ln || ' '} /> : <Text dimColor>{ln}</Text>))
           // 끌기를 놓은 자리가 이 버튼이면 바로 지워졌음 → 두 번 눌러야 지움
           const sure = (await read($, delAtom)) === t.id
@@ -431,7 +433,7 @@ export const register: Register = (on, options) => {
               await saveTabs($, (await loadTabs($)).filter(x => x.id !== t.id))
               await update($, tabAtom, () => 'tree')
             }}>
-              <Text color={sure ? 'error' : undefined} dimColor={!sure}>{sure ? '정말 지울까요? 한 번 더 누르면 지움' : '이 탭 지우기 (내용 파일은 남김)'}</Text>
+              <Text color={sure ? 'error' : undefined} dimColor={!sure}>{sure ? tr('delSure') : tr('delAsk')}</Text>
             </Button>,
           )
         }
@@ -491,24 +493,24 @@ export const register: Register = (on, options) => {
       const marks = await loadMarks($, viewer.open)
       const clouds = marks.filter(m => m.kind === 'cloud')
       const marksProp = marks.map(m => ({ id: m.id, line: m.line, c0: m.c0, c1: m.c1, kind: m.kind, ...(m.kind === 'cloud' ? { n: clouds.indexOf(m) + 1 } : m.n ? { n: m.n } : {}) }))
-      // 라벨은 ASCII·한글만: ◖◗ ∨ 같은 애매한 폭 글자는 터미널과 엔진의 칸 계산이 달라 클릭 위치가 어긋난다
-      const tools: [string, string][] = [['strike', '취소선'], ['good', '잘함'], ['bang', '!'], ['ask', '?'], ['caret', '^넣기'], ['cloud', '말구름'], ['erase', '지움']]
+      // Labels must stay ASCII/Hangul/plain letters: ambiguous-width symbols (e.g. half circles, check marks) make terminal and engine cell widths disagree and clicks drift
+      const tools: [string, string][] = [['strike', tr('toolStrike')], ['good', tr('toolGood')], ['bang', '!'], ['ask', '?'], ['caret', tr('toolCaret')], ['cloud', tr('toolCloud')], ['erase', tr('toolErase')]]
     const page = viewer.rows.slice(off, off + pageH) as { line: number; note?: boolean }[]
     const at = edit ? page.map(r => r.line === edit.line && !r.note).lastIndexOf(true) : -1 // 표시한 줄의 마지막 칸
     const box = edit ? (
       <Box flexDirection="column">
         <Input
           key={`mark-input:${edit.id ?? `${edit.line}:${edit.c0}`}`}
-          label={edit.kind === 'cloud' ? '말구름' : '넣을 말'}
+          label={edit.kind === 'cloud' ? tr('toolCloud') : tr('inputInsert')}
           value={edit.text}
           autoFocus
-          submitLabel="보내기"
+          submitLabel={tr('submit')}
           onInput={t => void update($, draftAtom, () => t)}
           onSubmit={t => void commitEdit($, t)}
         />
         <Box flexDirection="row" gap={2}>
-          <Button key="mark-ok" plain onPress={async () => void commitEdit($, await read($, draftAtom))}><Text color="success">[보내기]</Text></Button>
-          <Button key="mark-cancel" plain onPress={() => void update($, editAtom, () => null)}><Text dimColor>[취소]</Text></Button>
+          <Button key="mark-ok" plain onPress={async () => void commitEdit($, await read($, draftAtom))}><Text color="success">{tr('btnSubmit')}</Text></Button>
+          <Button key="mark-cancel" plain onPress={() => void update($, editAtom, () => null)}><Text dimColor>{tr('btnCancel')}</Text></Button>
         </Box>
       </Box>
     ) : null
@@ -561,8 +563,8 @@ export const register: Register = (on, options) => {
         {adding ? (
           <Input
             key="new-tab"
-            label="새 탭 제목"
-            placeholder="예: 오늘 할 일"
+            label={tr('newTabLabel')}
+            placeholder={tr('newTabPlaceholder')}
             autoFocus
             onSubmit={async title => {
               const name = title.trim()
@@ -572,7 +574,7 @@ export const register: Register = (on, options) => {
               await update($, addingAtom, () => false)
               await update($, tabAtom, () => id)
               // 합의하러 가기: 입력창에 문장을 채워 두기만 한다 (보내는 건 사람이)
-              void $.prompt.fill({ text: `패널에 '${name}' 탭을 만들었어 (${TABS_DIR}/${id}.md). 여기에 뭘 넣을지 같이 정하자: ` })
+              void $.prompt.fill({ text: tr('fillNewTab', { name, path: `${TABS_DIR}/${id}.md` }) })
             }}
           />
         ) : null}
@@ -581,9 +583,9 @@ export const register: Register = (on, options) => {
           <Button key="t:size" plain onPress={() => void (async () => { await update($, wideAtom, w => !w); await openPane($) })()}>
             <Text color="suggestion">{wide ? '▶◀' : '◀▶'}</Text>
           </Button>
-          {tabButton('tree', wide ? '폴더 트리' : '트리')}
-          {IS_WINDOWS ? tabButton('sketch', wide ? '그림판' : '그림') : null}
-          {tabButton('replay', wide ? '다시 보기' : '보기')}
+          {tabButton('tree', wide ? tr('tabTree') : tr('tabTreeS'))}
+          {IS_WINDOWS ? tabButton('sketch', wide ? tr('tabSketch') : tr('tabSketchS')) : null}
+          {tabButton('replay', wide ? tr('tabReplay') : tr('tabReplayS'))}
           {tabs.map(t => tabButton(t.id, t.title))}
           <Button key="t:add" plain onPress={() => void update($, addingAtom, a => !a)}>
             <Text color="success">{adding ? ' × ' : ' ＋ '}</Text>

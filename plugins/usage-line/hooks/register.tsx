@@ -1,6 +1,7 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register, SessionContextUsage } from 'claude-code'
 
+import { setLang, t, weekday } from './i18n'
 import type { Act, Info, Limit, Mark, Sys } from '../types'
 
 const limitsAtom = atom({ plugin: 'usage-line', key: 'limits' } as const, null)
@@ -19,18 +20,18 @@ const NEW_ACT: Act = { doneAt: 0, idleBack: false, told: null, open: false }
 export type Advice = { kind: 'new' | 'compact' | 'both' | null; why: string }
 export function advise(tokens: number, m: Mark | null, idleBack: boolean): Advice {
   const k = `${Math.round(tokens / 1000)}k`
-  if (idleBack) return { kind: 'new', why: `1시간 넘게 쉬었다 옴 + ${k} → 컴팩보다 새 세션` }
+  if (idleBack) return { kind: 'new', why: t('advIdle', { k }) }
   const pending = m?.pending ?? 0
   const done = !!m?.off && pending === 0 // committed, nothing left = README is current
   if (tokens >= 400_000) {
-    if (done) return { kind: 'new', why: `${k} ≥ 400k, 커밋까지 끝남 → 새 세션` }
-    if (pending > 0) return { kind: 'compact', why: `${k} ≥ 400k, 할 일 ${pending}개 남음 → 일 끊기는 곳에서 컴팩` }
-    return { kind: 'both', why: `${k} ≥ 400k → 일 끊기는 곳에서 컴팩이나 새 세션` }
+    if (done) return { kind: 'new', why: t('advBigDone', { k }) }
+    if (pending > 0) return { kind: 'compact', why: t('advBigPending', { k, pending }) }
+    return { kind: 'both', why: t('advBigBoth', { k }) }
   }
-  if (tokens >= 150_000 && done) return { kind: 'new', why: `${k} ≥ 150k, 일 하나 끝남(커밋) → 새 세션` }
-  return { kind: null, why: `${k}: 괜찮음 (150k + 일 끝남, 400k, 1시간 쉼 뒤 100k 에서 알림)` }
+  if (tokens >= 150_000 && done) return { kind: 'new', why: t('advMidDone', { k }) }
+  return { kind: null, why: t('advOk', { k }) }
 }
-const ADVICE_TEXT = { new: '새 세션 요망', compact: '컴팩', both: '컴팩 · 새 세션' }
+const adviceText = (k: 'new' | 'compact' | 'both') => t(k === 'new' ? 'labelNew' : k === 'compact' ? 'labelCompact' : 'labelBoth')
 // one line for the model, sent only when the advice changes (0 tokens otherwise)
 const ADVICE_AI = {
   new: 'suggest the user start a new session (save progress notes first)',
@@ -105,7 +106,7 @@ const short = (n: number) => (n >= 1e6 ? `${(n / 1e6).toFixed(1).replace(/\.0$/,
 
 function contextText(i: Info, withTokens: boolean): string {
   if (!i.window) return ''
-  return `문맥 ${i.percent ?? 0}%` + (withTokens && i.tokens ? ` (${short(i.tokens)}/${short(i.window)})` : '')
+  return t('context', { percent: i.percent ?? 0 }) + (withTokens && i.tokens ? ` (${short(i.tokens)}/${short(i.window)})` : '')
 }
 
 // 터미널 칸 수: 한글·한자는 2칸
@@ -114,8 +115,7 @@ export const cells = (s: string) => [...s].reduce((n, ch) => n + (/[ᄀ-ᇿ　-�
 const withContext = (old: Info | null, c: SessionContextUsage): Info =>
   ({ model: old?.model ?? '', effort: old?.effort, tokens: c.tokens, window: c.window, percent: c.percent })
 
-const NAMES: Record<string, string> = { five_hour: '5시간', seven_day: '주간' }
-const DAYS = ['일', '월', '화', '수', '목', '금', '토']
+const name = (kind: string) => t(kind === 'five_hour' ? 'win5h' : 'winWeek')
 
 // 4초마다 CPU·RAM·GPU(Arc)·NPU(AI Boost) 사용률을 JSON 한 줄로 내보낸다.
 // 필요한 장치의 카운터만 읽어서 가볍다 (코어 하나의 2~3%). Claude 가 꺼지면 4초 안에 스스로 끝난다.
@@ -179,19 +179,19 @@ function resetText(iso: string | undefined, now: Date): string {
   if (Number.isNaN(d.getTime())) return ''
   const hm = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
   const sameDay = d.toDateString() === now.toDateString()
-  return sameDay ? hm : `${d.getMonth() + 1}/${d.getDate()}(${DAYS[d.getDay()]}) ${hm}`
+  return sameDay ? hm : `${d.getMonth() + 1}/${d.getDate()}(${weekday(d)}) ${hm}`
 }
 
 function line(limits: Limit[] | null): string {
-  if (!limits || !limits.length) return '사용량 · 첫 응답 뒤에 표시'
+  if (!limits || !limits.length) return t('usageWait')
   const now = new Date()
   const parts = ['five_hour', 'seven_day'].map(kind => {
     const w = limits.find(x => x.kind === kind)
-    if (!w) return `${NAMES[kind]} -`
+    if (!w) return `${name(kind)} -`
     const reset = resetText(w.resetsAt, now)
-    return `${NAMES[kind]} ${w.percentUsed}%` + (reset ? ` (초기화 ${reset})` : '')
+    return `${name(kind)} ${w.percentUsed}%` + (reset ? ' ' + t('resetNote', { reset }) : '')
   })
-  return '사용량 · ' + parts.join(' · ')
+  return t('usagePrefix') + parts.join(' · ')
 }
 
 function sysLine(s: Sys | null): string {
@@ -200,7 +200,8 @@ function sysLine(s: Sys | null): string {
   return `CPU ${pct(s.cpu)} · RAM ${pct(s.ram)} (${s.ramGb}GB) · GPU ${pct(s.gpu)} · NPU ${pct(s.npu)}`
 }
 
-export const register: Register = on => {
+export const register: Register = (on, options) => {
+  setLang(String(options?.language ?? 'auto'))
   on('session.start', async ($, e, next) => {
     $.ui.status(undefined) // 예전 판의 상태 줄 지우기
     const usage = await $.session.usage()
@@ -302,7 +303,7 @@ export const register: Register = on => {
     const rawMark = await read($, markAtom)
     const mark = markView(rawMark)
     const adv = advise(info?.tokens ?? 0, rawMark, act.idleBack)
-    const advText = adv.kind ? ' · ' + ADVICE_TEXT[adv.kind] : ''
+    const advText = adv.kind ? ' · ' + adviceText(adv.kind) : ''
     const toggle = () => void update($, actAtom, old => ({ ...(old ?? NEW_ACT), open: !(old?.open ?? false) }))
     // 한 줄에 안 들어가면 먼저 문맥 토큰 수 (704k/1M) 를 빼고, 그래도 넘치면 사이 칸을 좁힌다
     const room = e.props.bodyColumns || 200
@@ -328,7 +329,7 @@ export const register: Register = on => {
         ) : null}
       </Box>
     )
-    const why = act.open && info?.model ? <Text color="warning">{'문맥 조언 · ' + adv.why + '  (다시 누르면 닫힘)'}</Text> : null
+    const why = act.open && info?.model ? <Text color="warning">{t('adviceTitle') + adv.why + '  ' + t('tapClose')}</Text> : null
     const top = why ? <Box flexDirection="column">{row}{why}</Box> : row
     return after ? <Box flexDirection="column">{top}{after}</Box> : top
   })

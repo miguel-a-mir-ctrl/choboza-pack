@@ -1,1 +1,15 @@
-{ "name": "usage-line", "version": "0.6.0", "description": "5시간·주간 사용량과 CPU·RAM·GPU·NPU 사용률, 지금 모델·effort·문맥을 입력칸 위에 계속 보여 준다", "types": "./types/index.d.ts" }
+{
+  "name": "usage-line",
+  "version": "0.6.0",
+  "description": "5시간·주간 사용량과 CPU·RAM·GPU·NPU 사용률, 지금 모델·effort·문맥을 입력칸 위에 계속 보여 준다",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "language": {
+      "type": "string",
+      "title": "Language",
+      "description": "UI language. auto = your system language.",
+      "default": "auto",
+      "options": ["auto", "ko", "en", "zh-Hans", "zh-Hant", "ja", "es", "fr", "id", "th"]
+    }
+  }
+}

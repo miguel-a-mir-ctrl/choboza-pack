@@ -2,7 +2,9 @@
   "name": "lab-panel",
   "version": "0.6.0",
   "description": "Side panel: a colorful file tree that lights up the files Claude reads and edits, a replay of the last turn's edits, and note tabs you can mark up",
-  "author": { "name": "miguel-a-mir-ctrl" },
+  "author": {
+    "name": "miguel-a-mir-ctrl"
+  },
   "types": "./types/index.d.ts",
   "userConfig": {
     "autoOpen": {
@@ -16,6 +18,24 @@
       "title": "Tabs folder",
       "description": "Where your note tabs are kept. Empty: ~/.claude/choboza-pack/panel",
       "default": ""
+    },
+    "language": {
+      "type": "string",
+      "title": "Language",
+      "description": "UI language. auto = your system language.",
+      "default": "auto",
+      "options": [
+        "auto",
+        "ko",
+        "en",
+        "zh-Hans",
+        "zh-Hant",
+        "ja",
+        "es",
+        "fr",
+        "id",
+        "th"
+      ]
     }
   }
 }
