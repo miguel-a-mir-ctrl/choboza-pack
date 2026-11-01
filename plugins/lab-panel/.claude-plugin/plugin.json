@@ -5,6 +5,7 @@
   "author": {
     "name": "miguel-a-mir-ctrl"
   },
+  "license": "MIT",
   "types": "./types/index.d.ts",
   "userConfig": {
     "autoOpen": {

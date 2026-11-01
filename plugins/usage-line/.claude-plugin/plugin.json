@@ -1,7 +1,8 @@
 {
   "name": "usage-line",
   "version": "0.6.0",
-  "description": "5시간·주간 사용량과 CPU·RAM·GPU·NPU 사용률, 지금 모델·effort·문맥을 입력칸 위에 계속 보여 준다",
+  "description": "A line above the prompt: 5-hour and weekly usage, CPU/RAM/GPU/NPU load (Windows), and the current model, effort and context",
+  "license": "MIT",
   "types": "./types/index.d.ts",
   "userConfig": {
     "language": {
