@@ -390,7 +390,7 @@ function detect(): Lang {
     const l = Intl.DateTimeFormat().resolvedOptions().locale.toLowerCase()
     if (l.startsWith('ko')) return 'ko'
     if (l.startsWith('ja')) return 'ja'
-    if (l === 'zh-tw' || l === 'zh-hk' || l.startsWith('zh-hant')) return 'zh-Hant'
+    if (l === 'zh-tw' || l === 'zh-hk' || l === 'zh-mo' || l.startsWith('zh-hant')) return 'zh-Hant'
     if (l.startsWith('zh')) return 'zh-Hans'
     if (l.startsWith('es')) return 'es'
     if (l.startsWith('fr')) return 'fr'
