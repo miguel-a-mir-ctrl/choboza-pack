@@ -1,0 +1,8 @@
+{
+  "name": "choboza-pack",
+  "owner": { "name": "miguel-a-mir-ctrl" },
+  "plugins": [
+    { "name": "usage-line", "source": "./plugins/usage-line" },
+    { "name": "lab-panel", "source": "./plugins/lab-panel" }
+  ]
+}
