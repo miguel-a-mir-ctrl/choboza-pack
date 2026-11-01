@@ -1,6 +1,8 @@
 [English](README.md) · [한국어](docs/README.ko.md) · [简体中文](docs/README.zh-Hans.md) · [繁體中文](docs/README.zh-Hant.md) · [日本語](docs/README.ja.md) · [Español](docs/README.es.md) · [Français](docs/README.fr.md) · [Bahasa Indonesia](docs/README.id.md) · [ไทย](docs/README.th.md)
 
-# choboza-pack
+# choboza-pack (초보자팩)
+
+> 🇰🇷 **초보자팩**: Claude Code를 처음 쓰는 사람을 위한 작은 모드 두 개. 사용량·PC 상태를 입력칸 위에 보여 주고, 옆 패널에서 파일 트리·메모·그림을 다룹니다. 토큰은 거의 안 씁니다. → [한국어 설명](docs/README.ko.md)
 
 Two small mods for Claude Code, made for beginners. They run as local code on your PC.
 
