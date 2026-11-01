@@ -2,6 +2,7 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register, SessionContextUsage } from 'claude-code'
 
 import { setLang, t, weekday } from './i18n'
+import { asGpuOpt, startSysmon } from './sysmon'
 import type { Act, Info, Limit, Mark, Sys } from '../types'
 
 const limitsAtom = atom({ plugin: 'usage-line', key: 'limits' } as const, null)
@@ -122,18 +123,19 @@ const name = (kind: string) => t(kind === 'five_hour' ? 'win5h' : 'winWeek')
 const SYSMON = String.raw`
 $ErrorActionPreference = 'SilentlyContinue'
 $parent = (Get-CimInstance Win32_Process -Filter "ProcessId=$PID").ParentProcessId
-function Get-Luid($class, $skip) {
-  $d = Get-PnpDevice -PresentOnly -Class $class | Where-Object { $_.FriendlyName -notmatch $skip } | Select-Object -First 1
-  if (-not $d) { return $null }
-  $v = [int64](Get-PnpDeviceProperty -InstanceId $d.InstanceId -KeyName '{60b193cb-5276-4d0f-96fc-f173abad3ec6} 2').Data
-  if (-not $v) { return $null }
-  'luid_0x{0:x8}_0x{1:x8}' -f ($v -shr 32), ($v -band 0xffffffff)
+# every matching device, not just the first: the busiest one is reported ($want is prepended by the caller)
+function Get-Luids($class, $skip, $match) {
+  foreach ($d in @(Get-PnpDevice -PresentOnly -Class $class | Where-Object { $_.FriendlyName -notmatch $skip -and $_.FriendlyName -match $match })) {
+    $v = [int64](Get-PnpDeviceProperty -InstanceId $d.InstanceId -KeyName '{60b193cb-5276-4d0f-96fc-f173abad3ec6} 2').Data
+    if ($v) { 'luid_0x{0:x8}_0x{1:x8}' -f ($v -shr 32), ($v -band 0xffffffff) }
+  }
 }
-$gpu = Get-Luid 'Display' 'Basic'
-$npu = Get-Luid 'ComputeAccelerator' '^$'
+$match = @{ auto = '.'; nvidia = 'NVIDIA'; amd = 'AMD|Radeon'; intel = 'Intel' }[$want]
+$gpu = @(); if ($match) { $gpu = @(Get-Luids 'Display' 'Basic' $match) }
+$npu = @(Get-Luids 'ComputeAccelerator' '^$' '.')
 $total = (Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory
 $paths = @('\Processor Information(_Total)\% Processor Utility', '\Memory\Available Bytes')
-foreach ($l in @($gpu, $npu)) { if ($l) { $paths += "\GPU Engine(*$l*)\Utilization Percentage" } }
+foreach ($l in @($gpu + $npu)) { if ($l) { $paths += "\GPU Engine(*$l*)\Utilization Percentage" } }
 while ($true) {
   if ($parent -and -not (Get-Process -Id $parent)) { exit }
   $s = (Get-Counter $paths).CounterSamples
@@ -146,7 +148,7 @@ while ($true) {
       $eng[$k] = $eng[$k] + $x.CookedValue
     }
   }
-  $peak = { param($l) if (-not $l) { return -1 }; $m = 0; foreach ($k in $eng.Keys) { if ($k.StartsWith($l + '|') -and $eng[$k] -gt $m) { $m = $eng[$k] } }; [math]::Min(100, [math]::Round($m)) }
+  $peak = { param($ls) if (-not $ls) { return -1 }; $m = 0; foreach ($l in $ls) { foreach ($k in $eng.Keys) { if ($k.StartsWith($l + '|') -and $eng[$k] -gt $m) { $m = $eng[$k] } } }; [math]::Min(100, [math]::Round($m)) }
   $out = @{ cpu = [math]::Min(100, [math]::Round($cpu)); ram = [math]::Round(100 * (1 - $avail / $total)); ramGb = [math]::Round(($total - $avail) / 1GB, 1); gpu = (& $peak $gpu); npu = (& $peak $npu) }
   [Console]::Out.WriteLine(($out | ConvertTo-Json -Compress))
   [Console]::Out.Flush()
@@ -197,11 +199,13 @@ function line(limits: Limit[] | null): string {
 function sysLine(s: Sys | null): string {
   if (!s) return ''
   const pct = (v: number) => (v < 0 ? '-' : `${v}%`)
-  return `CPU ${pct(s.cpu)} · RAM ${pct(s.ram)} (${s.ramGb}GB) · GPU ${pct(s.gpu)} · NPU ${pct(s.npu)}`
+  const gpu = s.gpu >= 0 && s.gpuApprox ? '~' + pct(s.gpu) : pct(s.gpu) // ~ = estimated from clock speed
+  return `CPU ${pct(s.cpu)} · RAM ${pct(s.ram)} (${s.ramGb}GB) · GPU ${gpu} · NPU ${pct(s.npu)}`
 }
 
 export const register: Register = (on, options) => {
   setLang(String(options?.language ?? 'auto'))
+  const gpuOpt = asGpuOpt(options?.gpu) // whitelisted: it is pasted into the PowerShell script
   on('session.start', async ($, e, next) => {
     $.ui.status(undefined) // 예전 판의 상태 줄 지우기
     const usage = await $.session.usage()
@@ -215,10 +219,11 @@ export const register: Register = (on, options) => {
     const profile = await $.env.get('USERPROFILE').catch(() => undefined)
     const home = (profile ?? (await $.env.get('HOME').catch(() => undefined)) ?? '').replace(/\\/g, '/')
     if (home) STATE_FILE = `${home}/.claude/usage_state.json`
-    // CPU/RAM/GPU/NPU meter uses Windows PowerShell + perf counters; other systems skip it (the line just omits it).
-    if ((await $.env.get('OS').catch(() => undefined)) === 'Windows_NT') void (async () => {
+    // CPU/RAM/GPU/NPU meter: Windows PowerShell perf counters; Linux/macOS polling in sysmon.ts
+    if ((await $.env.get('OS').catch(() => undefined)) !== 'Windows_NT') startSysmon($, gpuOpt, s => void update($, sysAtom, () => s))
+    else void (async () => {
       const mon = $.process.spawn({
-        argv: ['powershell', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', encodePs(SYSMON)],
+        argv: ['powershell', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', encodePs(`$want='${gpuOpt}'\n` + SYSMON)],
       })
       let buf = ''
       for await (const { stream, text } of mon) {

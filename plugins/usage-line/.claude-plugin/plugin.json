@@ -1,7 +1,7 @@
 {
   "name": "usage-line",
   "version": "0.6.0",
-  "description": "A line above the prompt: 5-hour and weekly usage, CPU/RAM/GPU/NPU load (Windows), and the current model, effort and context",
+  "description": "A line above the prompt: 5-hour and weekly usage, CPU/RAM/GPU/NPU load (Windows, Linux, macOS), and the current model, effort and context",
   "license": "MIT",
   "types": "./types/index.d.ts",
   "userConfig": {
@@ -11,6 +11,13 @@
       "description": "UI language. auto = your system language.",
       "default": "auto",
       "options": ["auto", "ko", "en", "zh-Hans", "zh-Hant", "ja", "es", "fr", "id", "th"]
+    },
+    "gpu": {
+      "type": "string",
+      "title": "GPU",
+      "description": "Which GPU the meter reads. auto = the busiest one found.",
+      "default": "auto",
+      "options": ["auto", "nvidia", "amd", "intel", "off"]
     }
   }
 }

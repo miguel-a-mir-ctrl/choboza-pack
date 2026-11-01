@@ -1,6 +1,6 @@
 export type Limit = { kind: string; percentUsed: number; resetsAt?: string }
 // -1 = 그 장치가 없거나 못 읽음
-export type Sys = { cpu: number; ram: number; ramGb: number; gpu: number; npu: number }
+export type Sys = { cpu: number; ram: number; ramGb: number; gpu: number; npu: number; gpuApprox?: boolean }
 // 지금 모델·effort·문맥. effort 는 첫 요청 전엔 없음
 export type Info = { model: string; effort?: string; tokens?: number; window: number; percent?: number }
 

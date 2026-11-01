@@ -1,13 +1,13 @@
-﻿# 그림판 보내기: 패널에서 그은 선을 원본 크기 그림 위에 자홍색(#FF00FF)으로 그려 새 파일로 저장한다.
-# 자홍색은 Claude 가 "사용자가 그린 표시"로 알아보는 약속 색.
+﻿# Sketch send: draw the strokes from the panel in magenta (#FF00FF) over the full-size original and save a new file.
+# Magenta is the agreed color Claude reads as "marks the user drew".
 param([string]$Base, [string]$StrokesFile, [int]$W, [int]$H, [string]$Out)
 $ErrorActionPreference = 'Stop'
-[Console]::OutputEncoding = [Text.Encoding]::UTF8 # 한글 오류 문구가 패널에서 깨지지 않게
+[Console]::OutputEncoding = [Text.Encoding]::UTF8 # keep non-ASCII output intact in the panel
 Add-Type -AssemblyName System.Drawing
 
 $img = [Drawing.Image]::FromFile($Base)
 $bmp = New-Object Drawing.Bitmap $img
-$img.Dispose() # 원본 파일 잠금 풀기
+$img.Dispose() # release the lock on the original file
 $g = [Drawing.Graphics]::FromImage($bmp)
 $g.SmoothingMode = 'AntiAlias'
 $sx = $bmp.Width / $W; $sy = $bmp.Height / $H

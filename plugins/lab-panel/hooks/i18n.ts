@@ -4,6 +4,8 @@ const LANGS: Lang[] = ['ko', 'en', 'zh-Hans', 'zh-Hant', 'ja', 'es', 'fr', 'id',
 export const KO = {
   unknownErr: '알 수 없는 오류',
   saveFail: '저장 실패: {err}',
+  errNoClipImage: '클립보드에 그림이 없어요. Win+Shift+S 로 캡처한 뒤 다시 눌러 주세요.',
+  sketchHintBlank: '"빈 종이"를 눌러 그리기 시작하세요.',
   fillSketch: '이 그림 봐줘 (내가 그린 표시 = 자홍색 #FF00FF 선): {out} ',
   cmdDesc: '패널 열기 (폴더 트리, 그림판, 내 탭)',
   panelOpened: '패널을 열었습니다.',
@@ -46,6 +48,8 @@ export const KO = {
 export const EN: Record<keyof typeof KO, string> = {
   unknownErr: 'Unknown error',
   saveFail: 'Save failed: {err}',
+  errNoClipImage: 'No image on the clipboard. Capture with Win+Shift+S, then try again.',
+  sketchHintBlank: 'Press "Blank paper" to start drawing.',
   fillSketch: 'Look at this drawing (my marks = magenta #FF00FF lines): {out} ',
   cmdDesc: 'Open the panel (file tree, sketch, my tabs)',
   panelOpened: 'Panel opened.',
@@ -88,6 +92,8 @@ export const EN: Record<keyof typeof KO, string> = {
 export const ZH_HANS: Record<keyof typeof KO, string> = {
   unknownErr: '未知错误',
   saveFail: '保存失败: {err}',
+  errNoClipImage: '剪贴板里没有图片。请用 Win+Shift+S 截图后再试。',
+  sketchHintBlank: '按 "空白纸" 开始绘画。',
   fillSketch: '看看这张图 (我画的标记 = 洋红色 #FF00FF 线): {out} ',
   cmdDesc: '打开面板 (文件树、画板、我的标签)',
   panelOpened: '面板已打开。',
@@ -130,6 +136,8 @@ export const ZH_HANS: Record<keyof typeof KO, string> = {
 export const ZH_HANT: Record<keyof typeof KO, string> = {
   unknownErr: '未知的錯誤',
   saveFail: '儲存失敗: {err}',
+  errNoClipImage: '剪貼簿裡沒有圖片。請用 Win+Shift+S 截圖後再試。',
+  sketchHintBlank: '按「空白紙」開始繪圖。',
   fillSketch: '看看這張圖 (我畫的標記 = 洋紅色 #FF00FF 線): {out} ',
   cmdDesc: '開啟面板 (檔案樹、小畫板、我的分頁)',
   panelOpened: '已開啟面板。',
@@ -172,6 +180,8 @@ export const ZH_HANT: Record<keyof typeof KO, string> = {
 export const JA: Record<keyof typeof KO, string> = {
   unknownErr: '不明なエラー',
   saveFail: '保存に失敗しました: {err}',
+  errNoClipImage: 'クリップボードに画像がありません。Win+Shift+S で撮ってからもう一度押してください。',
+  sketchHintBlank: '「白紙」を押して描き始めてください。',
   fillSketch: 'この絵を見て (私の印 = マゼンタ #FF00FF の線): {out} ',
   cmdDesc: 'パネルを開く (フォルダツリー、スケッチ、自分のタブ)',
   panelOpened: 'パネルを開きました。',
@@ -214,6 +224,8 @@ export const JA: Record<keyof typeof KO, string> = {
 export const ES: Record<keyof typeof KO, string> = {
   unknownErr: 'Error desconocido',
   saveFail: 'Error al guardar: {err}',
+  errNoClipImage: 'No hay ninguna imagen en el portapapeles. Captura con Win+Shift+S y vuelve a intentarlo.',
+  sketchHintBlank: 'Pulsa "Hoja en blanco" para empezar a dibujar.',
   fillSketch: 'Mira este dibujo (mis marcas = líneas magenta #FF00FF): {out} ',
   cmdDesc: 'Abrir el panel (árbol de archivos, dibujo, mis pestañas)',
   panelOpened: 'Panel abierto.',
@@ -256,6 +268,8 @@ export const ES: Record<keyof typeof KO, string> = {
 export const FR: Record<keyof typeof KO, string> = {
   unknownErr: 'Erreur inconnue',
   saveFail: 'Échec de l\'enregistrement : {err}',
+  errNoClipImage: 'Aucune image dans le presse-papiers. Fais une capture avec Win+Shift+S puis réessaie.',
+  sketchHintBlank: 'Clique sur « Feuille vierge » pour commencer à dessiner.',
   fillSketch: 'Regarde ce dessin (mes marques = traits magenta #FF00FF) : {out} ',
   cmdDesc: 'Ouvrir le panneau (arborescence, croquis, mes onglets)',
   panelOpened: 'Panneau ouvert.',
@@ -298,6 +312,8 @@ export const FR: Record<keyof typeof KO, string> = {
 export const ID: Record<keyof typeof KO, string> = {
   unknownErr: 'Kesalahan tidak diketahui',
   saveFail: 'Gagal menyimpan: {err}',
+  errNoClipImage: 'Tidak ada gambar di clipboard. Ambil layar dengan Win+Shift+S, lalu coba lagi.',
+  sketchHintBlank: 'Tekan "Kertas kosong" untuk mulai menggambar.',
   fillSketch: 'Lihat gambar ini (coretan saya = garis magenta #FF00FF): {out} ',
   cmdDesc: 'Buka panel (pohon file, sketsa, tab saya)',
   panelOpened: 'Panel dibuka.',
@@ -340,6 +356,8 @@ export const ID: Record<keyof typeof KO, string> = {
 export const TH: Record<keyof typeof KO, string> = {
   unknownErr: 'เกิดข้อผิดพลาดที่ไม่รู้สาเหตุ',
   saveFail: 'บันทึกไม่สำเร็จ: {err}',
+  errNoClipImage: 'ไม่มีรูปในคลิปบอร์ด กด Win+Shift+S เพื่อจับภาพหน้าจอ แล้วลองอีกครั้ง',
+  sketchHintBlank: 'กด "กระดาษเปล่า" เพื่อเริ่มวาด',
   fillSketch: 'ช่วยดูภาพนี้หน่อย (เส้นที่ฉันวาดเป็นสีม่วงแดง #FF00FF): {out} ',
   cmdDesc: 'เปิดแผง (ต้นไม้ไฟล์ กระดานวาดภาพ แท็บของฉัน)',
   panelOpened: 'เปิดแผงแล้ว',

@@ -1,4 +1,5 @@
 import { setLang, t as tr } from './i18n'
+import { encodePng1bit, rasterStrokes } from './png'
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
@@ -160,9 +161,23 @@ async function ps($: EngineInterface, script: string, args: string[]): Promise<R
   }
 }
 
+// Error codes printed by the .ps1 scripts -> i18n keys
+const ERR_KEYS: Record<string, 'errNoClipImage'> = { noClipImage: 'errNoClipImage' }
+const errText = (code: string) => (ERR_KEYS[code] ? tr(ERR_KEYS[code]) : code)
+
+const PAPER_W = 1280, PAPER_H = 800 // blank paper size (same as sketch-load.ps1)
+
 async function loadCanvas($: EngineInterface, source: 'clip' | 'blank', maxW: number, maxH: number): Promise<void> {
-  const j = await ps($, 'sketch-load.ps1', ['-Source', source, '-Dir', SKETCH_DIR, '-MaxW', String(maxW), '-MaxH', String(maxH)])
-  if (j.error) return void $.ui.toast(String(j.error))
+  let j: Record<string, unknown>
+  if (IS_WINDOWS) {
+    j = await ps($, 'sketch-load.ps1', ['-Source', source, '-Dir', SKETCH_DIR, '-MaxW', String(maxW), '-MaxH', String(maxH)])
+  } else {
+    // Same scaling as sketch-load.ps1; white paper only, no original file
+    const r = Math.min(maxW / PAPER_W, maxH / PAPER_H)
+    const w = Math.max(8, Math.floor(PAPER_W * r)), h = Math.max(8, Math.floor(PAPER_H * r))
+    j = { base: '', w, h, px: Array.from({ length: h }, () => 'ffffff'.repeat(w)) }
+  }
+  if (j.error) return void $.ui.toast(errText(String(j.error)))
   await update($, canvasAtom, () => ({ base: String(j.base), w: Number(j.w), h: Number(j.h), px: j.px as string[] }))
   await update($, strokesAtom, () => [])
   await update($, clearAtom, n => n + 1)
@@ -176,9 +191,18 @@ async function sendCanvas($: EngineInterface): Promise<void> {
   const stamp = `${d.getFullYear()}${p2(d.getMonth() + 1)}${p2(d.getDate())}-${p2(d.getHours())}${p2(d.getMinutes())}${p2(d.getSeconds())}`
   const out = `${SKETCH_DIR}/sketch-${stamp}.png`
   const strokesFile = `${SKETCH_DIR}/.strokes.json`
-  await $.fs.write(strokesFile, JSON.stringify(await read($, strokesAtom)))
-  const j = await ps($, 'sketch-save.ps1', ['-Base', cv.base, '-StrokesFile', strokesFile, '-W', String(cv.w), '-H', String(cv.h), '-Out', out])
-  if (j.error) return void $.ui.toast(tr('saveFail', { err: String(j.error) }))
+  const strokes = await read($, strokesAtom)
+  let j: Record<string, unknown>
+  if (IS_WINDOWS) {
+    await $.fs.write(strokesFile, JSON.stringify(strokes))
+    j = await ps($, 'sketch-save.ps1', ['-Base', cv.base, '-StrokesFile', strokesFile, '-W', String(cv.w), '-H', String(cv.h), '-Out', out])
+  } else {
+    // The runtime writes text only, so pipe base64 into `base64 --decode`
+    const png = encodePng1bit(rasterStrokes(strokes, cv.w, cv.h, PAPER_W, PAPER_H), PAPER_W, PAPER_H)
+    const r = await $.process.run(['sh', '-c', 'mkdir -p "$1" && base64 --decode > "$2"', 'sh', SKETCH_DIR, out], { stdin: png.toBase64() })
+    j = r.exitCode === 0 ? {} : { error: (r.stderr || r.stdout).trim().slice(0, 200) || tr('unknownErr') }
+  }
+  if (j.error) return void $.ui.toast(tr('saveFail', { err: errText(String(j.error)) }))
   void $.prompt.fill({ text: tr('fillSketch', { out }), mode: 'append' })
 }
 
@@ -336,14 +360,14 @@ export const register: Register = (on, options) => {
       fixed = (
         <Box flexDirection="column">
           <Box flexDirection="row" flexWrap="wrap" gap={1}>
-            <Button key="sk:clip" onPress={() => void loadCanvas($, 'clip', maxW, maxH)}>{tr('btnClipboard')}</Button>
+            {IS_WINDOWS ? <Button key="sk:clip" onPress={() => void loadCanvas($, 'clip', maxW, maxH)}>{tr('btnClipboard')}</Button> : null}
             <Button key="sk:blank" onPress={() => void loadCanvas($, 'blank', maxW, maxH)}>{tr('btnBlank')}</Button>
             {cv ? <Button key="sk:clear" onPress={async () => { await update($, strokesAtom, () => []); await update($, clearAtom, n => n + 1) }}>{tr('btnClear')}</Button> : null}
             {cv ? <Button key="sk:send" variant="primary" onPress={() => void sendCanvas($)}>{tr('btnSend')}</Button> : null}
           </Box>
           {cv
             ? <Client key="canvas" module="./canvas.tsx" props={{ w: cv.w, h: cv.h, px: cv.px, clear: await read($, clearAtom) }} width={cv.w} height={Math.ceil(cv.h / 2)} />
-            : <Text dimColor>{tr('sketchHint')}</Text>}
+            : <Text dimColor>{tr(IS_WINDOWS ? 'sketchHint' : 'sketchHintBlank')}</Text>}
           {cv ? <Text dimColor>{tr('sketchDraw')}</Text> : null}
           {cv ? <Text color={strokes.length ? 'success' : 'warning'}>{tr('strokesGot', { n: strokes.length })}</Text> : null}
         </Box>
@@ -585,7 +609,7 @@ export const register: Register = (on, options) => {
             <Text color="suggestion">{wide ? '▶◀' : '◀▶'}</Text>
           </Button>
           {tabButton('tree', wide ? tr('tabTree') : tr('tabTreeS'))}
-          {IS_WINDOWS ? tabButton('sketch', wide ? tr('tabSketch') : tr('tabSketchS')) : null}
+          {tabButton('sketch', wide ? tr('tabSketch') : tr('tabSketchS'))}
           {tabButton('replay', wide ? tr('tabReplay') : tr('tabReplayS'))}
           {tabs.map(t => tabButton(t.id, t.title))}
           <Button key="t:add" plain onPress={() => void update($, addingAtom, a => !a)}>
